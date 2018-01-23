@@ -1,4 +1,4 @@
-# The-Xth-Minute
+# The-X-Minutes
 Shows Bittrex's 6 cryptocurrencies which has highest percentage price change  in every X minutes
 
 Pumps and dumps are too common in cryptocurrency trading. Its gud to get into the coin for which the pump has just started. 
