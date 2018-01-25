@@ -8,7 +8,8 @@ import sys
 import os
 import math
 
-X = 6
+X = 10
+no_of_threads = 55
 
 class bittrex:
     def __init__(self):
@@ -57,14 +58,14 @@ class Parser:
             return -1
 
 class Bot:
-    def __init__(self):
+    def __init__(self,no_of_threads):
         self.lock = threading.Lock()
         self.plock = threading.Lock()
         self.currencies=parser.ext_cur(parser.extract(web.get_currencies()))
         self.dic = {}
         self.s_price = {}
         self.exit  = 0
-        self.no_threads = 100
+        self.no_threads = no_of_threads
         for each_currencies in self.currencies:
             self.dic[each_currencies] = 0
             self.s_price[each_currencies] = 0
@@ -132,5 +133,5 @@ class Bot:
 if __name__ == "__main__":
     web = bittrex()
     parser = Parser()
-    bot =  Bot()
+    bot =  Bot(no_of_threads)
 
