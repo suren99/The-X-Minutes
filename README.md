@@ -6,9 +6,12 @@ Bittrex is a cyrptocurrency exchange which has more than 100 coins to trade .
 
 This script allows you to monitor coins which has shown highest price change in X minutes . After the Xth minute it resets. If u see high percentage change , it means the pump is about to start . So you can catch the train before the train is about to start.
 
-All you have to do to run <strong> python main.py </strong> . You are ready to go !!!.
+All you have to do to run <strong> python main.py </strong> .
 
-You can also change the value the <strong>X</strong> . By default it is <strong>10 minutes</strong> .Change the value in X of line 11 in main.py. you are ready to go now.
+You can also change the value the <strong>X</strong> . By default it is <strong>10 minutes</strong> .Change the value in X of line 11 in main.py. 
+
+If u want u to exit the ticker just press <strong>Enter </strong> .you are ready to go now!!
+
 
 <strong> Enjoy the ride!!! </strong>
 Just HODL if you miscalculated the pump :)
