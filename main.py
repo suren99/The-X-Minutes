@@ -7,9 +7,10 @@ import time
 import sys
 import os
 import math
+import Queue
 
 X = 10
-no_of_threads = 55
+no_of_threads = 10
 
 class bittrex:
     def __init__(self):
@@ -57,81 +58,67 @@ class Parser:
         except:
             return -1
 
-class Bot:
-    def __init__(self,no_of_threads):
-        self.lock = threading.Lock()
-        self.plock = threading.Lock()
-        self.currencies=parser.ext_cur(parser.extract(web.get_currencies()))
-        self.dic = {}
-        self.s_price = {}
-        self.exit  = 0
-        self.no_threads = no_of_threads
-        for each_currencies in self.currencies:
-            self.dic[each_currencies] = 0
-            self.s_price[each_currencies] = 0
-        slot_size = len(self.currencies)/self.no_threads
-        cur_itr = 0
-        while(cur_itr < len(self.currencies)):
-           thread.start_new_thread(self.update,(cur_itr,min(cur_itr+slot_size-1,len(self.currencies)-1)))
-           cur_itr+=slot_size
-        thread.start_new_thread(self.show,())
-        thread.start_new_thread(self.timeout,())
-        x = raw_input()
-        self.exit = 1
-        print "Exit done"
+lock = threading.Lock()
+start_price = {}
+price_change = {}
+Q = Queue.Queue()
+cnt = 0
 
-    def show(self):
-         while not self.exit:
-             try:
-                self.lock.acquire()
-                sorted_list = sorted(self.dic.items(),key = operator.itemgetter(1),reverse=True) 
-                r = 0
-                for k,v in sorted_list[:7]:
- #                  self.table.add_row([k,v])
-                   sys.stdout.write("{0}:{1:.8f}%  ".format(k,v)) 
-                self.lock.release()
-              #  sys.stdout.write("{0} ".format(self.no_threads))
-                sys.stdout.flush()
-                sys.stdout.write("\r")
-             except:
-                 self.exit = 1
-                 raise 
+def work():
+    global ext_int,cnt
+    while True:
+        currency = Q.get()
+        if currency is None:
+            Q.task_done()
+            break
+        if currency is not "Timeout":
+            price = parser.ext_price(parser.extract(web.get_price("BTC-"+currency)))
+        lock.acquire()
+        if currency is "Timeout":
+            for key in start_price:
+                start_price[key] = 0
+        else:
+            if currency not in start_price or start_price[currency] == 0:
+                start_price[currency] = price
+            if price is None:
+                lock.release()
+                Q.task_done();
+                continue;
+            price_change[currency] = (price - start_price[currency])/start_price[currency]
+            if not ext_int:
+                for k,v in  sorted(price_change.items(), key = operator.itemgetter(1), reverse = True)[:6]:
+                    sys.stdout.write("{0}:{1:.8f}% ".format(k,v))
+            sys.stdout.flush()
+            sys.stdout.write("\r")
+        lock.release()
+        if ext_int == None and currency is not "Timeout":
+            Q.put(currency)
+        Q.task_done()
 
-    def timeout(self):
-        while not self.exit:
-            try:
-                self.plock.acquire()
-                for each_currencies in self.currencies:
-                    self.s_price[each_currencies]=0
-                self.plock.release()
-                time.sleep(60 * X)
-            except:
-                self.exit = 1
-                raise
-
-    def update(self,start,end):
-        try:
-            i=start
-            while True:
-                if i>end:
-                    i = start
-                market = self.currencies[i]
-                price = parser.ext_price(parser.extract(web.get_price("BTC-"+self.currencies[i])))
-                if price == -1 or price == None:
-                    return 
-                self.plock.acquire()
-                self.lock.acquire()
-                if self.s_price[market] ==0:
-                    self.s_price[market] = price        
-                self.dic[market] = (price - self.s_price[market])/self.s_price[market]
-                self.lock.release()
-                self.plock.release()
-                i+=1
-        except:
-            raise
+def timeout():
+    global ext_int
+    while True:
+        if ext_int is not None:
+            break
+        Q.put("Timeout")
+        time.sleep(X * 60)
 
 if __name__ == "__main__":
     web = bittrex()
     parser = Parser()
-    bot =  Bot(no_of_threads)
-
+    thread = [None] * (no_of_threads + 1)
+    ext_int = None
+    for i in range(no_of_threads):
+        thread[i] = threading.Thread(target = work)
+        thread[i].start()
+    thread[no_of_threads] = threading.Thread(target = timeout)
+    thread[no_of_threads].start()
+    for each_currency in parser.ext_cur(parser.extract(web.get_currencies())):
+        Q.put(each_currency)
+    ext_int = raw_input()
+    Q.join()
+    #calm up the workers
+    for i in range(no_of_threads):
+        Q.put(None)
+    for i in range(no_of_threads + 1):
+        thread[i].join()
