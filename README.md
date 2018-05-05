@@ -8,7 +8,13 @@ This script allows you to monitor coins which has shown highest price change in 
 
 All you have to do to run <strong> python main.py </strong> .
 
-You can also change the value the <strong>X</strong> . By default it is <strong>10 minutes</strong> .Change the value in X of line 11 in main.py. 
+Default Values: <strong>X</strong> - 10 | <strong>Number of threads</strong> - 10
+
+You can change the default values by passing them as params while running the file.
+
+``` 
+python main.py x=5 threads=20
+```
 
 If u want u to exit the ticker just press <strong>Enter </strong> .you are ready to go now!!
 
