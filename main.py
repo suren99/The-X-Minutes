@@ -12,6 +12,11 @@ import Queue
 X = 10
 no_of_threads = 10
 
+configs = {
+    'x': 10,
+    'threads': 10
+}
+
 class bittrex:
     def __init__(self):
         self.url="https://bittrex.com/api/v1.1/public/"
@@ -82,8 +87,8 @@ def work():
                 start_price[currency] = price
             if price is None:
                 lock.release()
-                Q.task_done();
-                continue;
+                Q.task_done()
+                continue
             price_change[currency] = (price - start_price[currency])/start_price[currency]
             if not ext_int:
                 for k,v in  sorted(price_change.items(), key = operator.itemgetter(1), reverse = True)[:6]:
@@ -103,7 +108,18 @@ def timeout():
         Q.put("Timeout")
         time.sleep(X * 60)
 
+def processParams():
+    argLen = len(sys.argv)
+    for i in range(1, argLen):
+        [param, val] = sys.argv[i].split("=")
+        configs[param] = int(val)
+
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        processParams()
+        [X, no_of_threads] = [configs['x'], configs['threads']]
+    print("Notification interval: ", X)
+    print("Number of Threads: ", no_of_threads)
     web = bittrex()
     parser = Parser()
     thread = [None] * (no_of_threads + 1)
