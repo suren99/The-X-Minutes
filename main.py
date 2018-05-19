@@ -118,8 +118,8 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         processParams()
         [X, no_of_threads] = [configs['x'], configs['threads']]
-    print("Notification interval: ", X)
-    print("Number of Threads: ", no_of_threads)
+    print "Refresh time: ", X , "minutes"
+    print "Number of Threads: ", no_of_threads, "\n"
     web = bittrex()
     parser = Parser()
     thread = [None] * (no_of_threads + 1)
