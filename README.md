@@ -21,3 +21,8 @@ If u want u to exit the ticker just press <strong>Enter </strong> .you are ready
 
 <strong> Enjoy the ride!!! </strong>
 Just HODL if you miscalculated the pump :)
+
+<h3> Donation: </h3>
+BTC: 18vUURnc6rS8BNU4CtSf6DCCv9a5DWrrA2 <br>
+ETH: 0x4b62c90e8b172ba40771af1b27dfc76d1d2eff58<br>
+LTC: Leak8FqtrsWNQrEHPCEiwDGy6jAyNf2GYc
