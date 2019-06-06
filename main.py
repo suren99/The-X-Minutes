@@ -72,10 +72,9 @@ cnt = 0
 def work():
     global ext_int,cnt
     while True:
-        currency = Q.get()
-        if currency is None:
-            Q.task_done()
+        if ext_int is not None:
             break
+        currency = Q.get()
         if currency is not "Timeout":
             price = parser.ext_price(parser.extract(web.get_price("BTC-"+currency)))
         lock.acquire()
@@ -106,7 +105,11 @@ def timeout():
         if ext_int is not None:
             break
         Q.put("Timeout")
-        time.sleep(X * 60)
+        # check for every 0.005s whether abort is called
+        for i in range(X * 12000): # (X * 60)/0.005
+            time.sleep(0.005)
+            if ext_int is not None:
+                break
 
 def processParams():
     argLen = len(sys.argv)
@@ -132,9 +135,11 @@ if __name__ == "__main__":
     for each_currency in parser.ext_cur(parser.extract(web.get_currencies())):
         Q.put(each_currency)
     ext_int = raw_input()
-    Q.join()
     #calm up the workers
-    for i in range(no_of_threads):
-        Q.put(None)
     for i in range(no_of_threads + 1):
         thread[i].join()
+    print("\nAborting...")
+    #empty up the queue
+    while Q.qsize() > 0:
+        a = Q.get()
+        Q.task_done()
